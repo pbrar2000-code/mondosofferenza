@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#172a3a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Registro Lavoro">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Registro Lavoro</title>
+<style>
+:root{--bg:#f3f6f9;--card:#fff;--ink:#172a3a;--muted:#657586;--line:#e2e8ee;--accent:#176b54;--accent2:#e6f4ee;--danger:#a33b3b;--shadow:0 8px 24px #152b3b0d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:#172a3a;color:white;padding:22px 18px 18px;padding-top:calc(22px + env(safe-area-inset-top));}
+header .sub{color:#c5d2dc;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+header h1{font-size:25px;margin:5px 0 0}
+main{max-width:760px;margin:auto;padding:16px 14px 100px}
+nav{display:flex;gap:8px;overflow:auto;padding:2px 0 14px}
+nav button{white-space:nowrap;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 14px;border-radius:999px;font-weight:650}
+nav button.active{background:var(--ink);color:white;border-color:var(--ink)}
+.panel{display:none}.panel.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+h2{font-size:18px;margin:0 0 13px}h3{font-size:14px;margin:0 0 8px;color:var(--muted)}
+.big{font-size:34px;font-weight:800;letter-spacing:-1px}.muted{color:var(--muted)}.small{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:13px;font-weight:650;margin:10px 0 6px}
+input,select{width:100%;padding:13px 12px;border:1px solid #cfd9e2;border-radius:11px;background:white;color:#172a3a;font:inherit}
+button.primary{border:0;background:var(--accent);color:white;border-radius:12px;padding:14px 16px;font-weight:750;width:100%;margin-top:13px}
+button.secondary{border:1px solid var(--line);background:white;color:var(--ink);border-radius:11px;padding:10px 12px;font-weight:650}
+button.danger{color:var(--danger);border-color:#e9caca}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:#f5f8fa;border-radius:13px;padding:12px}.stat strong{display:block;font-size:20px;margin-top:4px}
+.entry{padding:12px 0;border-bottom:1px solid var(--line)}.entry:last-child{border:0}
+.month-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.month-head button{width:42px;margin:0;padding:9px}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:12px}
+.dayname,.day{min-height:40px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.dayname{color:var(--muted);font-weight:700}
+.day{border:1px solid var(--line);border-radius:9px;background:white;position:relative}
+.day.selected{background:var(--ink);color:white;border-color:var(--ink)}
+.day.has:after{content:"";position:absolute;width:5px;height:5px;border-radius:50%;background:var(--accent);bottom:4px}
+.day.selected.has:after{background:white}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1}
+.notice{background:var(--accent2);color:#205b48;padding:11px;border-radius:11px;font-size:13px}
+footer{font-size:11px;color:var(--muted);text-align:center;padding:10px}
+@media(min-width:650px){main{padding-top:22px}.grid{grid-template-columns:1fr 1fr 1fr}}
+</style>
+</head>
+<body>
+<header><div class="sub">Il tuo registro personale</div><h1>Registro Lavoro</h1></header>
+<main>
+<nav>
+<button class="active" data-tab="home">Riepilogo</button>
+<button data-tab="entry">Registra ore</button>
+<button data-tab="calendar">Calendario</button>
+<button data-tab="reports">Resoconti</button>
+</nav>
+
+<section id="home" class="panel active">
+ <div class="card">
+  <div class="row"><div><div class="small">TOTALE GENERALE</div><div class="big" id="grandTotal">0h 00m</div></div><div style="font-size:30px">⏱️</div></div>
+  <div class="small">Somma di tutte le giornate salvate</div>
+ </div>
+ <div class="card">
+  <h2 id="currentMonthTitle">Questo mese</h2>
+  <div class="stats">
+   <div class="stat"><span class="small">Ore del mese</span><strong id="monthTotal">0h 00m</strong></div>
+   <div class="stat"><span class="small">Giorni lavorati</span><strong id="monthDays">0</strong></div>
+   <div class="stat"><span class="small">Ore questa settimana</span><strong id="weekTotal">0h 00m</strong></div>
+   <div class="stat"><span class="small">Media giornaliera</span><strong id="average">0h 00m</strong></div>
+  </div>
+ </div>
+ <div class="card"><h2>Ultime giornate</h2><div id="recent"></div></div>
+ <div class="notice">I dati vengono salvati automaticamente su questo dispositivo. Per sicurezza, usa periodicamente “Esporta backup” nella sezione Resoconti.</div>
+</section>
+
+<section id="entry" class="panel">
+ <div class="card">
+  <h2>Inserisci o modifica una giornata</h2>
+  <label for="workDate">Data</label><input type="date" id="workDate">
+  <div class="grid">
+   <div><label for="start">Ora entrata</label><input type="time" id="start"></div>
+   <div><label for="end">Ora uscita</label><input type="time" id="end"></div>
+  </div>
+  <label for="break">Pausa da sottrarre (minuti, facoltativa)</label><input type="number" id="break" min="0" step="5" value="0">
+  <div class="notice" style="margin-top:12px">Il totale viene calcolato automaticamente. Se l'uscita è dopo mezzanotte, l'app lo gestisce correttamente.</div>
+  <div class="row" style="margin-top:14px"><span class="muted">Totale giornata</span><strong class="big" style="font-size:25px" id="preview">0h 00m</strong></div>
+  <button class="primary" id="saveDay">Salva giornata</button>
+  <button class="secondary" style="width:100%;margin-top:8px" id="clearForm">Svuota campi</button>
+  <div class="small" id="formMessage" style="margin-top:10px"></div>
+ </div>
+ <div class="card"><h2>Giornate già registrate</h2><div id="sameMonthList"></div></div>
+</section>
+
+<section id="calendar" class="panel">
+ <div class="card">
+  <div class="month-head"><button class="secondary" id="prevMonth">‹</button><h2 id="calendarTitle" style="margin:0"></h2><button class="secondary" id="nextMonth">›</button></div>
+  <div class="calendar" id="calendarGrid"></div>
+  <div class="small" style="margin-top:10px">Tocca un giorno per vedere o inserire le ore. I giorni registrati hanno un puntino.</div>
+ </div>
+ <div class="card"><h2 id="selectedDateTitle">Giornata selezionata</h2><div id="selectedDayDetails"></div><button class="primary" id="editSelected">Inserisci / modifica questa data</button></div>
+</section>
+
+<section id="reports" class="panel">
+ <div class="card">
+  <h2>Resoconto mensile</h2>
+  <label for="reportMonth">Seleziona mese</label><input type="month" id="reportMonth">
+  <div class="stats" style="margin-top:12px">
+   <div class="stat"><span class="small">Totale ore</span><strong id="reportTotal">0h 00m</strong></div>
+   <div class="stat"><span class="small">Giorni lavorati</span><strong id="reportDays">0</strong></div>
+  </div>
+  <div id="reportList" style="margin-top:12px"></div>
+  <button class="primary" id="pdfMonth">Salva / stampa PDF del mese</button>
+ </div>
+ <div class="card">
+  <h2>Totali per tutti i mesi</h2><div id="allMonths"></div>
+  <button class="secondary" style="width:100%;margin-top:12px" id="pdfAll">Stampa riepilogo completo in PDF</button>
+ </div>
+ <div class="card">
+  <h2>Backup dei dati</h2><p class="small">Esporta una copia dei tuoi registri oppure importa un backup precedente.</p>
+  <div class="actions"><button class="secondary" id="exportBackup">Esporta backup</button><button class="secondary" id="importBackup">Importa backup</button></div>
+  <input type="file" id="backupFile" accept="application/json" hidden>
+ </div>
+</section>
+<footer>Registro Lavoro · I dati restano sul dispositivo, salvo backup esportato.</footer>
+</main>
+<script>
+const KEY='registro-lavoro-v1';
+let records=load(), viewDate=new Date(), selectedDate=iso(new Date());
+const $=id=>document.getElementById(id);
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch{return {}}}
+function persist(){localStorage.setItem(KEY,JSON.stringify(records));renderAll()}
+function iso(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function parseMinutes(t){if(!t)return null;let [h,m]=t.split(':').map(Number);return h*60+m}
+function duration(r){if(!r||!r.start||!r.end)return 0;let a=parseMinutes(r.start),b=parseMinutes(r.end);if(b<a)b+=1440;return Math.max(0,b-a-(Number(r.pause)||0))}
+function fmt(min){min=Math.max(0,Math.round(min));return `${Math.floor(min/60)}h ${String(min%60).padStart(2,'0')}m`}
+function dates(){return Object.keys(records).filter(k=>duration(records[k])>0).sort()}
+function sum(keys){return keys.reduce((n,k)=>n+duration(records[k]),0)}
+function monthKeys(m){return dates().filter(k=>k.startsWith(m))}
+function dateLabel(k){return new Date(k+'T12:00:00').toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'})}
+function recordHTML(k){let r=records[k];return `<div class="entry"><div class="row"><strong>${dateLabel(k)}</strong><strong>${fmt(duration(r))}</strong></div><div class="small">Entrata ${r.start||'—'} · Uscita ${r.end||'—'} · Pausa ${r.pause||0} min</div><div class="actions" style="margin-top:8px"><button class="secondary" onclick="editDate('${k}')">Apri / modifica</button></div></div>`}
+function weekStart(d){let x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return iso(x)}
+function renderHome(){
+ let now=new Date(),m=iso(now).slice(0,7),keys=monthKeys(m),wk=weekStart(now);
+ $('grandTotal').textContent=fmt(sum(dates()));$('monthTotal').textContent=fmt(sum(keys));$('monthDays').textContent=keys.length;
+ $('currentMonthTitle').textContent=now.toLocaleDateString('it-IT',{month:'long',year:'numeric'});
+ $('weekTotal').textContent=fmt(sum(dates().filter(k=>k>=wk&&k<=iso(now))));
+ $('average').textContent=fmt(keys.length?Math.round(sum(keys)/keys.length):0);
+ let recent=dates().slice(-5).reverse();$('recent').innerHTML=recent.length?recent.map(recordHTML).join(''):'<div class="muted">Non hai ancora registrato giornate.</div>';
+}
+function renderEntryList(){let m=$('workDate').value.slice(0,7);let ks=monthKeys(m).reverse();$('sameMonthList').innerHTML=ks.length?ks.map(recordHTML).join(''):'<div class="muted">Nessuna giornata registrata in questo mese.</div>'}
+function renderCalendar(){
+ let y=viewDate.getFullYear(),m=viewDate.getMonth(),first=new Date(y,m,1),days=new Date(y,m+1,0).getDate(),offset=(first.getDay()+6)%7;
+ $('calendarTitle').textContent=first.toLocaleDateString('it-IT',{month:'long',year:'numeric'});
+ let html=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'].map(x=>`<div class="dayname">${x}</div>`).join('');
+ for(let i=0;i<offset;i++)html+='<div></div>';
+ for(let d=1;d<=days;d++){let k=iso(new Date(y,m,d)),has=duration(records[k])>0;html+=`<button class="day ${k===selectedDate?'selected':''} ${has?'has':''}" onclick="selectDate('${k}')">${d}</button>`}
+ $('calendarGrid').innerHTML=html;renderSelectedDay();
+}
+function renderSelectedDay(){let r=records[selectedDate];$('selectedDateTitle').textContent=dateLabel(selectedDate);$('selectedDayDetails').innerHTML=r&&r.start&&r.end?`<div class="row"><span class="muted">Entrata</span><strong>${r.start}</strong></div><div class="row"><span class="muted">Uscita</span><strong>${r.end}</strong></div><div class="row"><span class="muted">Pausa</span><strong>${r.pause||0} min</strong></div><div class="row" style="margin-top:8px"><strong>Totale</strong><strong>${fmt(duration(r))}</strong></div>`:'<div class="muted">Nessun orario inserito per questa data.</div>'}
+function selectDate(k){selectedDate=k;renderCalendar()}
+function editDate(k){$('workDate').value=k;let r=records[k]||{};$('start').value=r.start||'';$('end').value=r.end||'';$('break').value=r.pause||0;updatePreview();switchTab('entry');renderEntryList()}
+function updatePreview(){let r={start:$('start').value,end:$('end').value,pause:$('break').value};$('preview').textContent=fmt(duration(r))}
+function renderReports(){let m=$('reportMonth').value||iso(new Date()).slice(0,7),ks=monthKeys(m);$('reportTotal').textContent=fmt(sum(ks));$('reportDays').textContent=ks.length;$('reportList').innerHTML=ks.length?ks.map(recordHTML).join(''):'<div class="muted">Nessuna giornata registrata in questo mese.</div>';
+ let months=[...new Set(dates().map(k=>k.slice(0,7)))].sort().reverse();$('allMonths').innerHTML=months.length?months.map(x=>`<div class="entry row"><span>${new Date(x+'-01T12:00:00').toLocaleDateString('it-IT',{month:'long',year:'numeric'})}</span><strong>${fmt(sum(monthKeys(x)))}</strong></div>`).join(''):'<div class="muted">Nessun mese ancora registrato.</div>'}
+function renderAll(){renderHome();renderEntryList();renderCalendar();renderReports()}
+function switchTab(id){document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.tab===id))}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+['start','end','break'].forEach(id=>$(id).addEventListener('input',updatePreview));
+$('workDate').value=iso(new Date());$('reportMonth').value=iso(new Date()).slice(0,7);
+$('saveDay').onclick=()=>{let k=$('workDate').value,s=$('start').value,e=$('end').value,p=Number($('break').value)||0;if(!k||!s||!e){$('formMessage').textContent='Inserisci data, ora di entrata e ora di uscita.';return}if(p<0){$('formMessage').textContent='La pausa non può essere negativa.';return}records[k]={start:s,end:e,pause:p};persist();$('formMessage').textContent='Giornata salvata correttamente.';selectedDate=k;viewDate=new Date(k+'T12:00:00')};
+$('clearForm').onclick=()=>{$('start').value='';$('end').value='';$('break').value=0;updatePreview();$('formMessage').textContent=''};
+$('prevMonth').onclick=()=>{viewDate.setMonth(viewDate.getMonth()-1);renderCalendar()};
+$('nextMonth').onclick=()=>{viewDate.setMonth(viewDate.getMonth()+1);renderCalendar()};
+$('editSelected').onclick=()=>editDate(selectedDate);
+$('reportMonth').onchange=renderReports;
+function printReport(all=false){let title=all?'Riepilogo completo':new Date($('reportMonth').value+'-01T12:00:00').toLocaleDateString('it-IT',{month:'long',year:'numeric'});let ks=all?dates():monthKeys($('reportMonth').value);let total=sum(ks);let rows=ks.map(k=>`<tr><td>${dateLabel(k)}</td><td>${records[k].start}</td><td>${records[k].end}</td><td>${records[k].pause||0} min</td><td>${fmt(duration(records[k]))}</td></tr>`).join('');let w=window.open('','_blank');if(!w){alert('Consenti i popup per creare il PDF, poi scegli “Salva come PDF”.');return}w.document.write(`<!doctype html><html lang="it"><meta charset="utf-8"><title>${title}</title><style>body{font:14px Arial;padding:30px;color:#172a3a}h1{margin-bottom:4px}table{width:100%;border-collapse:collapse;margin-top:20px}td,th{padding:9px;border-bottom:1px solid #ddd;text-align:left}th{background:#eef2f5}.total{font-size:22px;font-weight:bold;margin-top:18px}@media print{button{display:none}}</style><h1>Registro Lavoro</h1><div>${title}</div><div class="total">Totale: ${fmt(total)}</div><div>Giornate registrate: ${ks.length}</div><table><thead><tr><th>Data</th><th>Entrata</th><th>Uscita</th><th>Pausa</th><th>Totale</th></tr></thead><tbody>${rows}</tbody></table><p>Creato il ${new Date().toLocaleDateString('it-IT')}</p><script>window.onload=()=>window.print()<\/script></html>`);w.document.close()}
+$('pdfMonth').onclick=()=>printReport(false);$('pdfAll').onclick=()=>printReport(true);
+$('exportBackup').onclick=()=>{let blob=new Blob([JSON.stringify(records,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='backup-registro-lavoro.json';a.click();URL.revokeObjectURL(a.href)};
+$('importBackup').onclick=()=>$('backupFile').click();
+$('backupFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let obj=JSON.parse(await f.text());if(!obj||typeof obj!=='object'||Array.isArray(obj))throw Error();if(confirm('Importare il backup? Le giornate con la stessa data verranno sostituite.')){records={...records,...obj};persist();alert('Backup importato.')}}catch{alert('File di backup non valido.')}e.target.value=''};
+if('serviceWorker'in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+function init(){updatePreview();renderAll()}
+init();
+</script>
+</body></html>
